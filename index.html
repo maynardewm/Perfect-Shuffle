@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+	<head>
+		<style>
+		.graph {
+			width: 100%;
+			border: solid 1px #000;
+			margin-bottom: 20px;
+			position: relative;
+			box-sizing: border-box;
+		}
+		.bar {
+			height: 10px;
+			background-color: red;
+			margin-bottom: 5px;
+			display: inline-block;
+		}
+		.label {
+			font-size: 10px;
+			float: left;
+			display: inline-block;
+			margin-right: 5px;
+		}
+		.array-count-line {
+			width: 1px;
+			background-color: #000;
+			height: 100%;
+			top: 0px;
+			position: absolute;
+			z-index: 2;
+		}
+		</style>
+	</head>
+	<body>
+		<div id="graphs"></div>
+	</body>
+	<script>
+		let deck = Array.from(Array(52).keys());
+
+		/* ---------- HELPER FUNCTIONS ---------- */
+		/* ------------------------------------- */
+		function visualizeRandomness(counts, repeat) {
+			// Create a new graph
+			let graph = document.createElement("div");
+			graph.className = "graph";
+			document.body.appendChild(graph);
+
+			for (let property in counts) {
+			    if (counts.hasOwnProperty(property)) {
+			    	let group = document.createElement("div");
+			    	group.className = "group";
+			    	graph.appendChild(group);
+
+			        let label = document.createElement("div");
+			        label.className = "label"
+			        label.innerHTML = property;
+			        group.appendChild(label);
+
+			        let bar = document.createElement("div");
+			        bar.className = "bar";
+					bar.style.width = (counts[property] / repeat) * 100 + "%";
+					group.appendChild(bar);
+			    }
+			}
+		}
+
+		/* ------------------ SHUFFLE FUNCTIONS ------------------ */
+		/* ------------------------------------------------------ */
+		// Standard Fisher-Yates Shuffle
+		let shuffle = function(array) {
+			// Slicing so as to create a new copy of the array,
+			// rather than modifying the original
+			let result = array.slice();
+			let i = result.length, j, temp;
+
+			if ( i == 0 ) return result;
+
+			// Iterate through array, counting down
+			while ( --i ) {
+				// Get a random number
+			    j = Math.floor( Math.random() * ( i + 1 ) );
+			    // Find the ele in it's original position 
+			    temp = result[i];
+			    // Replace it with the random ele
+			    result[i] = result[j];
+			    // Where the random ele was before, replace it with the orig ele
+			    result[j] = temp;
+			}
+
+			return result;
+		};
+		/* Bad Shuffles */
+		badShuffle = function(array) {
+			// Found a bad example here: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array/43235780
+			let result = array.slice();
+			let end = result.sort(() => Math.random() - 0.5);
+			return end;
+		} 
+		clearlyUnfairShuffle = function (array) { return array; }; 
+		anotherClearlyUnfairShuffle = function(array) { 
+		  return ([].concat(array)).sort(function(a, b) {
+		    return a-b;
+		  }); 
+		};
+
+		/* ----- TEST ----- */
+		let isShuffleFair = function (shuffleFunction) {
+			// Something fairly large, but not small
+			let repeat = 50000;
+			// Shortened to 4 elements for simpler visualization
+			let array = [0, 1, 2, 3];
+			let shuffledDeck = shuffleFunction(array); 
+			let n = array.length;
+		 	let i = 0;
+		 	let counts = [];
+		 	// We want to test n! to see if it repeats
+		 	while(i < repeat) {
+		 		// Add the result to our permutations array
+		 		let result = shuffleFunction(array);
+		 		// Keep track of repeats
+		 		counts[result] = (counts[result] || 0) + 1;
+		 		i++;
+		 	}
+		 	console.log(counts);
+		 	visualizeRandomness(counts, repeat);
+		};
+
+		/* ---------------- OUTPUTS ------------------ */
+		/* ------------------------------------------ */
+		document.write("Well shuffled array: " + shuffle(deck) + "<br /><br />");
+
+		document.write("A Fair Shuffle: ");
+		isShuffleFair(shuffle);
+
+		document.write("An Unfair Shuffle: ");
+		isShuffleFair(badShuffle);
+
+		document.write("clearlyUnfairShuffle");
+		isShuffleFair(clearlyUnfairShuffle);
+
+		document.write("anotherClearlyUnfairShuffle");
+		isShuffleFair(anotherClearlyUnfairShuffle);
+	</script>
+</html>
